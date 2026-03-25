@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>50x Complex Web Canvas</title>
+    <style>
+        /* 宇宙空間のような真っ黒な背景 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden; /* スクロールバーを消す */
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* キャンバス（お絵かきエリア）を画面いっぱいに広げる */
+        canvas {
+            display: block;
+        }
+
+        /* 画面中央に浮かび上がるテキスト */
+        #center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 3rem;
+            letter-spacing: 10px;
+            pointer-events: none; /* マウスの動きの邪魔をしない設定 */
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="center-text">MOVE MOUSE</h1>
+    
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // --- ここから50倍複雑なJavaScript ---
+        
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = []; // 無数の粒（パーティクル）を管理する箱
+        let hue = 0; // 色を変化させるための変数
+
+        // マウスの座標を記憶するオブジェクト
+        const mouse = {
+            x: undefined,
+            y: undefined,
+        }
+
+        // マウスが動いた時の処理
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+            // マウスが動くたびに、新しい粒を5個生み出す
+            for (let i = 0; i < 5; i++) {
+                particlesArray.push(new Particle());
+            }
+        });
+
+        // 「粒（パーティクル）」の設計図（クラス）
+        class Particle {
+            constructor() {
+                this.x = mouse.x;
+                this.y = mouse.y;
+                // 大きさ、X方向のスピード、Y方向のスピードをランダムに設定
+                this.size = Math.random() * 10 + 1;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+                this.color = 'hsl(' + hue + ', 100%, 50%)'; // 虹色に変化
+            }
+            
+            // 粒の動きを計算する
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // 徐々に小さくする
+                if (this.size > 0.2) this.size -= 0.1;
+            }
+            
+            // 粒を画面に描く
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 全ての粒を管理・処理する関数
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                // 粒同士の距離を計算して、近ければ線で結ぶ（星座のような表現）
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy); // ピタゴラスの定理
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = particlesArray[i].color;
+                        ctx.lineWidth = 0.2; // 線の細さ
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // 粒が小さくなったら配列から消す（メモリの節約）
+                if (particlesArray[i].size <= 0.3) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        // アニメーションを繰り返すループ関数
+        function animate() {
+            // 背景をうっすら黒で塗りつぶすことで、残像（軌跡）を作る
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            handleParticles();
+            hue += 2; // 色を少しずつズラす
+            
+            // ブラウザの描画タイミングに合わせて無限ループ
+            requestAnimationFrame(animate);
+        }
+
+        // ブラウザの画面サイズが変わった時の処理
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // アニメーション開始！
+        animate();
+    </script>
+</body>
+</html>
