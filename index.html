@@ -53,34 +53,36 @@
         .section-title { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; margin-bottom: 60px; line-height: 1; }
 
         /* --- Strengths (Grid) --- */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+        /* min()を使ってスマホでの横はみ出しを完全防止 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 40px; }
         
         .card {
-            position: relative; height: 550px; border-radius: 4px; overflow: hidden;
+            position: relative; height: 550px; border-radius: 8px; overflow: hidden;
             background: var(--gray); cursor: pointer;
+            /* 少しだけ影をつけて立体感を演出 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .card img {
             width: 100%; height: 100%; object-fit: cover;
             filter: grayscale(100%); transition: 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-        .card:hover img { filter: grayscale(0%); transform: scale(1.08); }
+        .card:hover img { filter: grayscale(0%); transform: scale(1.05); }
         
         .card-info {
             position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: var(--white);
+            background: linear-gradient(transparent, rgba(0,0,0,0.9)); color: var(--white);
             transform: translateY(10px); opacity: 0; transition: 0.5s;
         }
         .card:hover .card-info { transform: translateY(0); opacity: 1; }
-        .card h3 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 900; }
+        .card h3 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 900; font-family: var(--font-en); }
 
         /* --- Profile --- */
         .profile-section { background: var(--gray); }
         .profile-layout {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 60px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 60px;
         }
         .info-item { margin-bottom: 40px; }
-        /* labelからspanに修正 */
-        .info-item .item-label { display: block; font-size: 0.7rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; }
+        .info-item .item-label { display: block; font-size: 0.7rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; font-family: var(--font-en); }
         .info-item .item-content { font-size: 1.4rem; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
 
         /* --- CTA --- */
@@ -93,12 +95,30 @@
         .cta-btn:hover { color: var(--primary); transform: translateY(-5px); }
 
         /* --- Footer --- */
-        footer { padding: 80px 10%; border-top: 1px solid var(--gray); text-align: center; font-size: 0.7rem; letter-spacing: 3px; }
+        footer { padding: 80px 10%; border-top: 1px solid var(--gray); text-align: center; font-size: 0.7rem; letter-spacing: 3px; font-family: var(--font-en); }
 
         /* --- Animation --- */
         .reveal { opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(0.215, 0.61, 0.355, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
+        /* =========================================
+           スマホ用レスポンシブ設計 (超一流の調整)
+           ========================================= */
+        @media (max-width: 768px) {
+            section { padding: 80px 5%; } /* 余白を最適化 */
+            .profile-layout { gap: 30px; }
+            .card { height: 400px; } /* スマホでは高さを抑えて見やすく */
+            .card-info { 
+                /* スマホでは常に文字が見えるようにする（タップ前提のUI設計） */
+                opacity: 1; 
+                transform: translateY(0); 
+                padding: 20px;
+                background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            }
+            .card img { filter: grayscale(30%); } /* デフォルトで少し色をつける */
+            .info-item .item-content { font-size: 1.1rem; }
+            .cta { padding: 100px 5%; }
+        }
     </style>
 </head>
 <body>
@@ -118,14 +138,14 @@
         <h2 class="section-title reveal">MY<br>STRENGTHS</h2>
         <div class="grid">
             <article class="card reveal">
-                <img src="p1.jpg" alt="STRENGTH 01: RESOLVE">
+                <img src="p1.jpg" alt="STRENGTH 01: RESOLVE - 街中の五重塔" loading="lazy" decoding="async">
                 <div class="card-info">
                     <h3>01. RESOLVE</h3>
                     <p>粘り強い課題解決力。複雑なエラーも確実に解消します。</p>
                 </div>
             </article>
             <article class="card reveal">
-                <img src="p2.jpg" alt="STRENGTH 02: CONNECT">
+                <img src="p2.jpg" alt="STRENGTH 02: CONNECT - 特徴的なモニュメント" loading="lazy" decoding="async">
                 <div class="card-info">
                     <h3>02. CONNECT</h3>
                     <p>周囲を巻き込む協力体制。チームの出力を最大化させます。</p>
@@ -170,24 +190,22 @@
     </footer>
 
     <script>
-        // Intersection Observer を使用した洗練された表示アニメーション
+        // 監視オブザーバーの最適化
         const observerOptions = {
             root: null,
             rootMargin: '0px',
-            threshold: 0.1 // 10%見えたら実行
+            threshold: 0.1
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                    // 一度表示されたら監視を止める（何度も動かしたい場合は下を消す）
                     observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
 
-        // 対象の要素をすべて監視
         document.querySelectorAll('.reveal').forEach(el => {
             observer.observe(el);
         });
