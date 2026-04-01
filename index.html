@@ -1,151 +1,570 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>50x Complex Web Canvas</title>
-    <style>
-        /* 宇宙空間のような真っ黒な背景 */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            overflow: hidden; /* スクロールバーを消す */
-            font-family: 'Arial', sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【自分の名前に変えて】 | Recruitment 2027</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
 
-        /* キャンバス（お絵かきエリア）を画面いっぱいに広げる */
-        canvas {
-            display: block;
-        }
+  <style>
+    /* 1. 基本設定（CSS Variablesとアニメーションの定義） */
+    :root {
+      --main-color: #003366; /* 誠実な紺色 */
+      --accent-color: #ff9900; /* 活気あるオレンジ */
+      --text-main: #2c3e50;
+      --text-sub: #7f8c8d;
+      --bg-white: #ffffff;
+      --bg-light: #f4f7f6; /* 薄いグレーでメリハリ */
+      --transition-main: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* なめらかな動き */
+      --font-base: 'Noto Sans JP', sans-serif;
+      --font-stencil: 'Saira Stencil One', cursive; /* ヒーロー見出し用 */
+    }
 
-        /* 画面中央に浮かび上がるテキスト */
-        #center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 3rem;
-            letter-spacing: 10px;
-            pointer-events: none; /* マウスの動きの邪魔をしない設定 */
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            text-align: center;
-        }
-    </style>
+    /* 【動きのある】アニメーション定義 */
+    /* 下からふわっと、より大きく */
+    @keyframes fadeInUpLarge {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 上からふわっと */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ヒーロー見出しの文字が順番に光る */
+    @keyframes textGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0); }
+      50% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px var(--accent-color); }
+    }
+
+    /* ボタンが常に光るエフェクト */
+    @keyframes shine {
+      100% { left: 125%; }
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-base);
+      color: var(--text-main);
+      line-height: 1.8;
+      background-color: var(--bg-white);
+      scroll-behavior: smooth; /* スムーズスクロール */
+      overflow-x: hidden; /* 横はみ出し防止 */
+    }
+
+    /* 2. 追従ナビゲーションバー（見やすく、動きを追加） */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px); /* すりガラス効果 */
+      padding: 20px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+      animation: fadeInDown 1s ease both;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--main-color);
+      text-decoration: none;
+      letter-spacing: 1.5px;
+      transition: var(--transition-main);
+    }
+    .logo:hover { color: var(--accent-color); transform: scale(1.05); }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: var(--transition-main);
+      position: relative;
+    }
+
+    /* 【動きのある】ナビ下線（中央から広がる） */
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 3px;
+      bottom: -8px;
+      left: 50%;
+      background-color: var(--accent-color);
+      transition: var(--transition-main);
+      transform: translateX(-50%);
+    }
+
+    .nav-links a:hover { color: var(--main-color); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* 3. ヒーローセクション（より印象的で動きを追加） */
+    .hero {
+      height: 95vh;
+      background: linear-gradient(135deg, #001f4d 0%, #003366 50%, #005580 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 10s ease infinite; /* 動く背景 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      padding: 20px;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .hero h1 {
+      font-family: var(--font-stencil); /* 特徴的なフォント */
+      font-size: 7vw;
+      font-weight: normal;
+      margin: 0 0 20px;
+      letter-spacing: 3px;
+      animation: fadeInUpLarge 1.2s 0.2s ease both, textGlow 4s infinite 1s; /* 時間差ふわっと ＋ 光る */
+    }
+
+    .hero p {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 50px;
+      animation: fadeInUpLarge 1.2s 0.6s ease both; /* さらに遅延 */
+    }
+
+    .hero .slogan {
+      background: rgba(255, 153, 0, 0.9);
+      color: #fff;
+      padding: 8px 25px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 40px;
+      border-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      animation: fadeInDown 1s ease both;
+    }
+
+    /* 下向き矢印アイコン */
+    .hero .scroll-arrow {
+      position: absolute;
+      bottom: 50px;
+      font-size: 2.5rem;
+      color: rgba(255,255,255,0.7);
+      animation: arrowBounce 2s infinite, fadeInUpLarge 1.2s 1s ease both;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .hero .scroll-arrow:hover { color: #fff; }
+
+    @keyframes arrowBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(15px); }
+    }
+
+    /* 4. セクション共通（動きとデザイン） */
+    section {
+      padding: 120px 20px; /* 余白を広げて見やすく */
+      max-width: 1200px;
+      margin: 0 auto;
+      opacity: 0; /* 最初は隠す */
+      animation: fadeInUpLarge 1s var(--transition-speed) ease both; /* スクロール表示用 */
+    }
+
+    /* 【見やすさUP】セクションごとに背景色を交互に */
+    section:nth-of-type(even) { background-color: var(--bg-light); border-radius: 50px; }
+
+    h2 {
+      text-align: center;
+      font-size: 2.8rem;
+      margin-bottom: 80px;
+      color: var(--main-color);
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    h2::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 5px;
+      background: var(--accent-color);
+      border-radius: 5px;
+      transition: width 0.6s 0.3s ease; /* 時間差で伸びる */
+    }
+
+    /* 【動きのある】ホバーで下線が伸びる */
+    h2:hover::after { width: 100px; }
+
+    /* 5. ストレングス（カードレイアウト・見やすく、動きを強化） */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* 少し大きく */
+      gap: 50px;
+    }
+
+    .card {
+      background: var(--bg-white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04); /* 柔らかい影 */
+      transition: var(--transition-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 【動きのある】カードのホバー演出（浮き上がる ＋ 影 ＋ 画像拡大） */
+    .card:hover {
+      transform: translateY(-15px) scale(1.03);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+
+    .card-img-wrapper {
+      width: 100%;
+      height: 250px;
+      overflow: hidden; /* 画像はみ出し防止 */
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #eee;
+      transition: var(--transition-main);
+    }
+
+    /* 【動きのある】ホバー時に画像が拡大 */
+    .card:hover img { transform: scale(1.1); }
+
+    .card-content { padding: 40px; flex-grow: 1; }
+
+    .card-content h4 { margin: 0 0 18px; color: var(--main-color); font-size: 1.4rem; }
+    .card-content p { color: var(--text-sub); font-size: 1rem; }
+
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .skill-tag {
+      background: #e9ecef;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text-main);
+      transition: var(--transition-main);
+    }
+
+    .skill-tag:hover { background: var(--main-color); color: white; transform: scale(1.1); }
+
+    /* 6. タイムラインセクション（見やすく、動きを追加） */
+    .timeline {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      padding-left: 60px;
+    }
+
+    /* タイムラインの中央線 */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 100%;
+      top: 0;
+      left: 20px;
+      background-color: var(--main-color);
+      opacity: 0.2;
+      border-radius: 3px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeInUpLarge 0.8s ease both;
+    }
+
+    /* タイムラインの丸（動きを追加） */
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background-color: var(--bg-white);
+      border: 5px solid var(--main-color);
+      border-radius: 50%;
+      top: 0;
+      left: -53px;
+      z-index: 1;
+      transition: var(--transition-main);
+    }
+
+    /* ホバーで丸が光る */
+    .timeline-item:hover::after { background-color: var(--accent-color); border-color: var(--accent-color); transform: scale(1.2); }
+
+    .timeline-content {
+      background: var(--bg-white);
+      padding: 25px 35px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+      transition: var(--transition-main);
+      position: relative;
+    }
+    .timeline-content::before { /* 吹き出しの矢印 */
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: -10px;
+      width: 20px;
+      height: 20px;
+      background: var(--bg-white);
+      transform: rotate(45deg);
+    }
+
+    .timeline-content:hover { transform: translateX(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+
+    .timeline-date {
+      color: var(--accent-color);
+      font-weight: bold;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    /* 【動きのある】アニメーション遅延の設定 */
+    .timeline-item:nth-child(1) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.4s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.6s; }
+
+    /* 7. プロフィール（テーブル・見やすく、動きを強化） */
+    .info-table {
+      width: 100%;
+      border-collapse: separate; /* 隙間を開けて見やすく */
+      border-spacing: 0 10px;
+      margin-top: 40px;
+    }
+
+    .info-table tr {
+      background: var(--bg-white);
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.02);
+      transition: var(--transition-main);
+      opacity: 0;
+      animation: fadeInUpLarge 0.8s ease both;
+    }
+
+    /* テーブルの行が順番に現れる */
+    .info-table tr:nth-child(1) { animation-delay: 0.1s; }
+    .info-table tr:nth-child(2) { animation-delay: 0.2s; }
+    .info-table tr:nth-child(3) { animation-delay: 0.3s; }
+    .info-table tr:nth-child(4) { animation-delay: 0.4s; }
+
+    .info-table tr:hover {
+      background-color: #fafbfe;
+      transform: scale(1.02) translateX(5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    .info-table th, .info-table td {
+      padding: 25px 30px;
+      text-align: left;
+    }
+
+    .info-table th {
+      width: 30%;
+      color: var(--main-color);
+      font-weight: bold;
+      border-radius: 10px 0 0 10px;
+    }
+    .info-table td {
+      color: var(--text-sub);
+      border-radius: 0 10px 10px 0;
+    }
+
+    /* 8. エントリーボタン（動きとデザインを強化） */
+    .cta-area {
+      text-align: center;
+      padding: 120px 20px;
+      background: linear-gradient(-45deg, #f8f9fa, #e9ecef, #f8f9fa);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    .cta-button {
+      background: var(--accent-color);
+      color: #fff;
+      padding: 25px 80px; /* 大きく */
+      font-size: 1.6rem;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 60px;
+      box-shadow: 0 8px 25px rgba(255,153,0,0.5);
+      transition: var(--transition-main);
+      display: inline-block;
+      position: relative;
+      overflow: hidden; /* 光るエフェクト用 */
+    }
+
+    /* 【動きのある】キラリと光るエフェクト（継続的） */
+    .cta-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+      animation: shine 3s infinite;
+    }
+
+    .cta-button:hover {
+      opacity: 0.95;
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(255,153,0,0.6);
+    }
+
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 40px;
+      background: var(--main-color);
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
-<body>
+<body id="top">
 
-    <h1 id="center-text">MOVE MOUSE</h1>
+  <nav>
+    <a href="#top" class="logo">山田 太郎 PORTFOLIO</a> <ul class="nav-links">
+      <li><a href="#message">MESSAGE</a></li>
+      <li><a href="#strengths">STRENGTHS</a></li>
+      <li><a href="#timeline">CAREER</a></li>
+      <li><a href="#profile">PROFILE</a></li>
+      <li><a href="#contact">CONTACT</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <span class="slogan">「『個』の力が、『組織』の熱になる。」</span>
+    <h1>2027 NEW GRADUATES</h1>
+    <p>未来を、僕らの遊び場にする。</p>
+    <div class="scroll-arrow" onclick="location.href='#message'">⬇</div>
+  </header>
+
+  <main class="container">
     
-    <canvas id="canvas"></canvas>
+    <section id="message">
+      <h2>MESSAGE</h2>
+      <div style="text-align:center; max-width:800px; margin: 0 auto;">
+        <h3 style="color:var(--main-color); font-size:1.8rem; margin-bottom:25px; line-height:1.5;">情熱を持って、誠実に歩む。</h3>
+        <p style="font-size:1.15rem; color:var(--text-sub); line-height:2;">私は学生時代、〇〇での活動を通じて「人の想いを形にする」喜びを知りました。<br>
+        このサイトでは、私のこれまでの経験と、これから目指したいでたらめな姿を公開しています。<br>
+        一歩ずつ着実に、しかし大胆に。社会に貢献できるでたらめなエンジニアを目指します。</p>
+      </div>
+    </section>
 
-    <script>
-        // --- ここから50倍複雑なJavaScript ---
-        
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    <section id="strengths">
+      <h2>STRENGTHS</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-img-wrapper">
+            <img src="p1.jpg.jpeg" alt="強み1"> </div>
+          <div class="card-content">
+            <h4>粘り強い課題解決力</h4>
+            <p>でたらめなエラーに直面しても、多角的な視点から調査を行い、でたらめな解決までやり遂げる力があります。</p>
+            <div class="skill-list">
+              <span class="skill-tag">Debugging</span> <span class="skill-tag">Problem Solving</span> <span class="skill-tag">Git</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-img-wrapper">
+            <img src="p2.jpg.jpg" alt="強み2"> </div>
+          <div class="card-content">
+            <h4>周囲を巻き込む協力体制</h4>
+            <p>でたらめなチーム開発において、円滑なコミュニケーションを心がけ、でたらめな生産性を高める役割を担います。</p>
+            <div class="skill-list">
+              <span class="skill-tag">Teamwork</span> <span class="skill-tag">Communication</span> <span class="skill-tag">Slack</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        let particlesArray = []; // 無数の粒（パーティクル）を管理する箱
-        let hue = 0; // 色を変化させるための変数
+    <section id="timeline">
+      <h2>CAREER (でたらめ)</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <span class="timeline-date">2024.10 - 現在</span>
+            <h4>でたらめ大学 〇〇研究室 所属</h4>
+            <p>「でたらめなAIを活用した、でたらめなUXデザイン」の研究に着手。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <span class="timeline-date">2023.08 - 2023.12</span>
+            <h4>でたらめ株式会社 インターン</h4>
+            <p>でたらめなWebサービスの開発に携わり、でたらめな技術を習得。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <span class="timeline-date">2022.04</span>
+            <h4>でたらめ大学 入学</h4>
+            <p>でたらめな学部・学科に入学。でたらめな知識の基礎を学ぶ。</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        // マウスの座標を記憶するオブジェクト
-        const mouse = {
-            x: undefined,
-            y: undefined,
-        }
+    <section id="profile">
+      <h2>PROFILE</h2>
+      <table class="info-table">
+        <tr><th>氏名</th><td>山田 太郎 / Taro Yamada</td></tr> <tr><th>所属</th><td>でたらめ大学 でたらめ学部 (2027年3月卒業見込み)</td></tr>
+        <tr><th>保有資格</th><td>でたらめパスポート、基本情報技術者試験、TOEIC 750点</td></tr>
+        <tr><th>趣味</th><td>でたらめな個人開発、カフェ巡り、写真撮影</td></tr>
+      </table>
+    </section>
 
-        // マウスが動いた時の処理
-        window.addEventListener('mousemove', function(event) {
-            mouse.x = event.x;
-            mouse.y = event.y;
-            // マウスが動くたびに、新しい粒を5個生み出す
-            for (let i = 0; i < 5; i++) {
-                particlesArray.push(new Particle());
-            }
-        });
+  </main>
 
-        // 「粒（パーティクル）」の設計図（クラス）
-        class Particle {
-            constructor() {
-                this.x = mouse.x;
-                this.y = mouse.y;
-                // 大きさ、X方向のスピード、Y方向のスピードをランダムに設定
-                this.size = Math.random() * 10 + 1;
-                this.speedX = Math.random() * 3 - 1.5;
-                this.speedY = Math.random() * 3 - 1.5;
-                this.color = 'hsl(' + hue + ', 100%, 50%)'; // 虹色に変化
-            }
-            
-            // 粒の動きを計算する
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                // 徐々に小さくする
-                if (this.size > 0.2) this.size -= 0.1;
-            }
-            
-            // 粒を画面に描く
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+  <div id="contact" class="cta-area">
+    <a href="mailto:example@gmail.com" class="cta-button">CONTACT ME</a>
+    <p style="margin-top:30px; color:var(--text-sub); font-size:1.1rem;">お問い合わせはこちらからお気軽にどうぞ(でたらめです)</p>
+  </div>
 
-        // 全ての粒を管理・処理する関数
-        function handleParticles() {
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-                
-                // 粒同士の距離を計算して、近ければ線で結ぶ（星座のような表現）
-                for (let j = i; j < particlesArray.length; j++) {
-                    const dx = particlesArray[i].x - particlesArray[j].x;
-                    const dy = particlesArray[i].y - particlesArray[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy); // ピタゴラスの定理
-                    
-                    if (distance < 100) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = particlesArray[i].color;
-                        ctx.lineWidth = 0.2; // 線の細さ
-                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-                        ctx.stroke();
-                    }
-                }
-                
-                // 粒が小さくなったら配列から消す（メモリの節約）
-                if (particlesArray[i].size <= 0.3) {
-                    particlesArray.splice(i, 1);
-                    i--;
-                }
-            }
-        }
+  <footer>
+    &copy; 2026 Taro Yamada Portfolio Project. </footer>
 
-        // アニメーションを繰り返すループ関数
-        function animate() {
-            // 背景をうっすら黒で塗りつぶすことで、残像（軌跡）を作る
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            handleParticles();
-            hue += 2; // 色を少しずつズラす
-            
-            // ブラウザの描画タイミングに合わせて無限ループ
-            requestAnimationFrame(animate);
-        }
-
-        // ブラウザの画面サイズが変わった時の処理
-        window.addEventListener('resize', function() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-        // アニメーション開始！
-        animate();
-    </script>
 </body>
 </html>
