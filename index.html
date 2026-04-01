@@ -1,695 +1,196 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>山田 太郎 | Recruitment 2027</title> <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
-
-  <style>
-    /* =========================================
-       1. 基本設定・CSS変数・アニメーション定義
-       ========================================= */
-    :root {
-      --main-color: #003366; /* 誠実な紺色 */
-      --accent-color: #ff9900; /* 活気あるオレンジ */
-      --accent-light: #ffb84d; /* 薄いオレンジ */
-      --text-main: #2c3e50;
-      --text-sub: #7f8c8d;
-      --bg-white: #ffffff;
-      --bg-light: #f4f7f6; /* 薄いグレー */
-      --bg-dark: #001f4d; /* ヒーロー用濃い紺色 */
-      
-      /* アニメーション速度 */
-      --transition-main: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      --transition-slow: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-      
-      /* フォント */
-      --font-base: 'Noto Sans JP', sans-serif;
-      --font-stencil: 'Saira Stencil One', cursive;
-    }
-
-    /* アニメーション定義 */
-    /* 下からふわっと */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(50px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    /* 上からふわっと */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    /* ヒーロー見出しが光る */
-    @keyframes textGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0); }
-      50% { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px var(--accent-color); }
-    }
-    /* ボタンがキラッと光る */
-    @keyframes shine {
-      100% { left: 125%; }
-    }
-    /* 背景の光る粒が動く */
-    @keyframes particleMove {
-      0% { transform: translateY(0) translateX(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
-    }
-
-    /* スクロールアニメーション用クラス（JSで追加） */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: var(--transition-slow);
-    }
-    .fade-in.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    body {
-      margin: 0;
-      font-family: var(--font-base);
-      color: var(--text-main);
-      line-height: 1.8;
-      background-color: var(--bg-white);
-      scroll-behavior: smooth;
-      overflow-x: hidden;
-    }
-
-    /* =========================================
-       2. ヘッダー・ナビゲーション
-       ========================================= */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background-color: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px); /* ガラスモーフィズム */
-      padding: 15px 50px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-      animation: fadeInDown 1s ease both;
-    }
-
-    .logo {
-      font-size: 1.6rem;
-      font-weight: bold;
-      color: var(--main-color);
-      text-decoration: none;
-      letter-spacing: 1px;
-      transition: var(--transition-main);
-    }
-    .logo:hover { color: var(--accent-color); transform: scale(1.03); }
-
-    .nav-links {
-      display: flex;
-      gap: 25px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .nav-links a {
-      text-decoration: none;
-      color: var(--text-main);
-      font-weight: bold;
-      font-size: 0.9rem;
-      transition: var(--transition-main);
-      position: relative;
-    }
-
-    /* ナビ下線アニメーション（中央から広がる） */
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 3px;
-      bottom: -6px;
-      left: 50%;
-      background-color: var(--accent-color);
-      transition: var(--transition-main);
-      transform: translateX(-50%);
-    }
-    .nav-links a:hover { color: var(--main-color); }
-    .nav-links a:hover::after { width: 100%; }
-
-    /* =========================================
-       3. ヒーローセクション（かっこいい動き）
-       ========================================= */
-    .hero {
-      height: 100vh;
-      background-color: var(--bg-dark);
-      background: radial-gradient(circle at center, #003366 0%, #001f4d 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: #fff;
-      padding: 20px;
-      position: relative;
-      overflow: hidden; /* パーティクル用 */
-    }
-
-    /* パーティクル背景（CSSアニメーション） */
-    .hero::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      background-image: 
-        radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-        radial-gradient(rgba(255, 184, 77, 0.5) 2px, transparent 2px);
-      background-size: 50px 50px, 100px 100px;
-      background-position: 0 0, 25px 25px;
-      animation: gradientShift 15s linear infinite;
-      opacity: 0.6;
-    }
-    @keyframes gradientShift {
-      from { background-position: 0 0, 25px 25px; }
-      to { background-position: 100px 100px, 125px 125px; }
-    }
-
-    .hero h1 {
-      font-family: var(--font-stencil); /* 特徴的なフォント */
-      font-size: 8vw;
-      margin: 0 0 10px;
-      letter-spacing: 2px;
-      animation: fadeInUp 1.2s 0.2s ease both, textGlow 4s infinite 1.5s; /* 時間差ふわっと ＋ 光る */
-    }
-
-    .hero p {
-      font-size: 2.2rem;
-      font-weight: bold;
-      margin-bottom: 50px;
-      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      animation: fadeInUp 1.2s 0.6s ease both; /* 遅延 */
-    }
-
-    .hero .slogan {
-      background: rgba(255, 153, 0, 0.95);
-      color: #fff;
-      padding: 10px 30px;
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 30px;
-      border-radius: 5px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      animation: fadeInDown 1s ease both;
-    }
-
-    /* 下向き矢印アイコン */
-    .hero .scroll-arrow {
-      position: absolute;
-      bottom: 60px;
-      font-size: 2.8rem;
-      color: rgba(255,255,255,0.7);
-      animation: arrowBounce 2s infinite, fadeInUp 1.2s 1s ease both;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-    .hero .scroll-arrow:hover { color: #fff; }
-
-    @keyframes arrowBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(15px); }
-    }
-
-    /* =========================================
-       4. セクション共通デザイン
-       ========================================= */
-    main {
-      perspective: 1000px; /* 3D効果用 */
-    }
-    section {
-      padding: 140px 20px; /* 余白を広くして見やすく */
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* セクションごとに背景色を交互に */
-    section:nth-of-type(even) { background-color: var(--bg-light); border-radius: 60px; }
-
-    h2 {
-      text-align: center;
-      font-size: 3rem;
-      margin-bottom: 90px;
-      color: var(--main-color);
-      position: relative;
-      padding-bottom: 25px;
-      font-weight: 700;
-    }
-
-    h2::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0; /* 最初は0 */
-      height: 6px;
-      background: linear-gradient(to right, var(--main-color), var(--accent-color));
-      border-radius: 5px;
-      transition: width 0.6s 0.3s ease; /* 時間差で伸びる */
-    }
-
-    /* ホバーで下線が伸びる */
-    h2:hover::after { width: 120px; }
-
-    /* =========================================
-       5. メッセージセクション
-       ========================================= */
-    .message-content {
-      text-align: center;
-      max-width: 850px;
-      margin: 0 auto;
-      background: var(--bg-white);
-      padding: 50px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-    }
-    .message-content h3 {
-      color: var(--main-color);
-      font-size: 2rem;
-      margin-bottom: 30px;
-      line-height: 1.4;
-    }
-    .message-content p {
-      font-size: 1.2rem;
-      color: var(--text-sub);
-      line-height: 2.1;
-    }
-
-    /* =========================================
-       6. ストレングス（3D画像カード）
-       ========================================= */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* 少し大きく */
-      gap: 60px;
-    }
-
-    .card {
-      background: var(--bg-white);
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.06); /* 柔らかい影 */
-      transition: var(--transition-main);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transform-style: preserve-3d; /* 3D効果用 */
-    }
-
-    /* 3Dホバー演出（浮き上がる ＋ 影 ＋ 画像拡大） */
-    .card:hover {
-      transform: translateY(-20px) rotateX(5deg) rotateY(2deg); /* 立体的に傾ける */
-      box-shadow: 0 30px 80px rgba(0,0,0,0.15);
-    }
-
-    .card-img-wrapper {
-      width: 100%;
-      height: 280px;
-      overflow: hidden; /* 画像はみ出し防止 */
-    }
-
-    .card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: var(--transition-slow);
-    }
-
-    /* ホバー時に画像が拡大 */
-    .card:hover img { transform: scale(1.1); }
-
-    .card-content { padding: 45px; flex-grow: 1; }
-
-    .card-content h4 { margin: 0 0 20px; color: var(--main-color); font-size: 1.6rem; font-weight: 700; }
-    .card-content p { color: var(--text-sub); font-size: 1.05rem; }
-
-    .skill-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 30px;
-    }
-
-    .skill-tag {
-      background: #e9ecef;
-      padding: 8px 18px;
-      border-radius: 25px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: var(--text-main);
-      transition: var(--transition-main);
-    }
-
-    .skill-tag:hover { background: var(--main-color); color: white; transform: scale(1.1); }
-
-    /* =========================================
-       7. タイムライン（見やすく、動きを追加）
-       ========================================= */
-    .timeline {
-      position: relative;
-      max-width: 950px;
-      margin: 0 auto;
-      padding-left: 70px;
-    }
-
-    /* タイムラインの中央線 */
-    .timeline::before {
-      content: '';
-      position: absolute;
-      width: 8px;
-      height: 100%;
-      top: 0;
-      left: 20px;
-      background-color: var(--main-color);
-      opacity: 0.15;
-      border-radius: 4px;
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 70px;
-    }
-
-    /* タイムラインの丸（動きを追加） */
-    .timeline-item::after {
-      content: '';
-      position: absolute;
-      width: 28px;
-      height: 28px;
-      background-color: var(--bg-white);
-      border: 6px solid var(--main-color);
-      border-radius: 50%;
-      top: 0;
-      left: -61px;
-      z-index: 1;
-      transition: var(--transition-main);
-    }
-
-    /* ホバーで丸が光る */
-    .timeline-item:hover::after { background-color: var(--accent-color); border-color: var(--accent-color); transform: scale(1.2); }
-
-    .timeline-content {
-      background: var(--bg-white);
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-      transition: var(--transition-main);
-      position: relative;
-    }
-    .timeline-content::before { /* 吹き出しの矢印 */
-      content: '';
-      position: absolute;
-      top: 18px;
-      left: -12px;
-      width: 24px;
-      height: 24px;
-      background: var(--bg-white);
-      transform: rotate(45deg);
-    }
-
-    .timeline-content:hover { transform: translateX(15px); box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-
-    .timeline-date {
-      color: var(--accent-color);
-      font-weight: bold;
-      font-size: 1rem;
-      margin-bottom: 10px;
-      display: inline-block;
-    }
-    .timeline-content h4 { color: var(--main-color); font-size: 1.3rem; margin: 0 0 10px; }
-
-    /* =========================================
-       8. 【NEW】SKILLS/TOOLS セクション
-       ========================================= */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 30px;
-      text-align: center;
-    }
-    .skill-item {
-      background: var(--bg-white);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-      transition: var(--transition-main);
-    }
-    .skill-item:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    .skill-item i { font-size: 3rem; color: var(--main-color); margin-bottom: 15px; display: block; }
-    .skill-item span { font-weight: bold; color: var(--text-main); font-size: 1rem; }
-
-    /* =========================================
-       9. プロフィール（テーブル・かっこよく）
-       ========================================= */
-    .info-table {
-      width: 100%;
-      border-collapse: separate; /* 隙間を開けて見やすく */
-      border-spacing: 0 15px;
-      margin-top: 50px;
-    }
-
-    .info-table tr {
-      background: var(--bg-white);
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.03);
-      transition: var(--transition-main);
-    }
-
-    .info-table tr:hover {
-      background-color: #fafbfe;
-      transform: scale(1.02) translateX(8px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
-
-    .info-table th, .info-table td {
-      padding: 30px;
-      text-align: left;
-    }
-
-    .info-table th {
-      width: 30%;
-      color: var(--main-color);
-      font-weight: bold;
-      font-size: 1.1rem;
-      border-radius: 15px 0 0 15px;
-    }
-    .info-table td {
-      color: var(--text-sub);
-      font-size: 1.05rem;
-      border-radius: 0 15px 15px 0;
-    }
-
-    /* =========================================
-       10. エントリーボタン（動きを強化）
-       ========================================= */
-    .cta-area {
-      text-align: center;
-      padding: 140px 20px;
-      background: radial-gradient(circle at center, #f4f7f6 0%, #e9ecef 100%);
-    }
-
-    .cta-button {
-      background: var(--accent-color);
-      color: #fff;
-      padding: 30px 100px; /* 大きく */
-      font-size: 1.8rem;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 70px;
-      box-shadow: 0 10px 30px rgba(255,153,0,0.5);
-      transition: var(--transition-main);
-      display: inline-block;
-      position: relative;
-      overflow: hidden; /* 光るエフェクト用 */
-    }
-
-    /* キラリと光るエフェクト（継続的） */
-    .cta-button::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-      animation: shine 3s infinite;
-    }
-
-    .cta-button:hover {
-      opacity: 0.95;
-      transform: translateY(-8px) scale(1.05);
-      box-shadow: 0 20px 50px rgba(255,153,0,0.6);
-    }
-
-    /* フッター */
-    footer {
-      text-align: center;
-      padding: 50px;
-      background: var(--main-color);
-      color: rgba(255,255,255,0.8);
-      font-size: 0.95rem;
-    }
-  </style>
-</head>
-<body id="top">
-
-  <nav>
-    <a href="#top" class="logo">山田 太郎 PORTFOLIO</a> <ul class="nav-links">
-      <li><a href="#message">MESSAGE</a></li>
-      <li><a href="#strengths">STRENGTHS</a></li>
-      <li><a href="#timeline">CAREER</a></li>
-      <li><a href="#skills">SKILLS</a></li>
-      <li><a href="#profile">PROFILE</a></li>
-      <li><a href="#contact">CONTACT</a></li>
-    </ul>
-  </nav>
-
-  <header class="hero">
-    <div class="particles"></div> <span class="slogan fade-in">「『個』の力が、『組織』の熱になる。」</span>
-    <h1>2027 NEW GRADUATES</h1>
-    <p class="fade-in">未来を、僕らの遊び場にする。</p>
-    <div class="scroll-arrow" onclick="location.href='#message'">⬇</div>
-  </header>
-
-  <main class="container">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TARO YAMADA | PORTFOLIO 2027</title>
     
-    <section id="message" class="fade-in">
-      <h2>MESSAGE</h2>
-      <div class="message-content">
-        <h3>情熱を持って、誠実に歩む。</h3>
-        <p>私は学生時代、〇〇での活動を通じて「人の想いを形にする」喜びを知りました。<br>
-        このサイトでは、でたらめな情報と、私のこれまでの経験と、これから目指したいでたらめな姿を公開して誤字脱字誤字います。<br>
-        一歩ずつ着実に、しかし大胆に。社会に貢献できるでたらめなエンジニアを目指します。</p>
-      </div>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0051ff;
+            --black: #050505;
+            --white: #ffffff;
+            --gray: #f0f0f2;
+            --font-en: 'Inter', sans-serif;
+            --font-jp: 'Noto Sans JP', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            font-family: var(--font-jp);
+            overflow-x: hidden;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 20px 5%; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .logo { font-family: var(--font-en); font-weight: 900; font-size: 1.2rem; letter-spacing: 2px; }
+        .nav-info { font-size: 0.7rem; font-weight: 700; color: var(--primary); }
+
+        /* --- Hero --- */
+        header {
+            height: 100vh; background: var(--black); color: var(--white);
+            display: flex; flex-direction: column; justify-content: center; padding: 0 10%;
+        }
+        header .label { color: var(--primary); font-family: var(--font-en); font-weight: 900; margin-bottom: 20px; font-size: 0.9rem; }
+        header h1 { font-family: var(--font-en); font-size: clamp(3rem, 12vw, 10rem); line-height: 0.85; font-weight: 900; }
+        header h1 span { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4); color: transparent; }
+        header .desc { margin-top: 40px; font-size: 1.2rem; font-weight: 300; opacity: 0.8; }
+
+        /* --- Sections --- */
+        section { padding: 120px 10%; }
+        .section-title { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; margin-bottom: 60px; line-height: 1; }
+
+        /* --- Strengths (Grid) --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+        
+        .card {
+            position: relative; height: 550px; border-radius: 4px; overflow: hidden;
+            background: var(--gray); cursor: pointer;
+        }
+        .card img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%); transition: 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .card:hover img { filter: grayscale(0%); transform: scale(1.08); }
+        
+        .card-info {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: var(--white);
+            transform: translateY(10px); opacity: 0; transition: 0.5s;
+        }
+        .card:hover .card-info { transform: translateY(0); opacity: 1; }
+        .card h3 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 900; }
+
+        /* --- Profile --- */
+        .profile-section { background: var(--gray); }
+        .profile-layout {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 60px;
+        }
+        .info-item { margin-bottom: 40px; }
+        /* labelからspanに修正 */
+        .info-item .item-label { display: block; font-size: 0.7rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; }
+        .info-item .item-content { font-size: 1.4rem; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+        /* --- CTA --- */
+        .cta { text-align: center; padding: 150px 10%; }
+        .cta-btn {
+            display: inline-block; font-family: var(--font-en); font-size: clamp(2rem, 8vw, 6rem); font-weight: 900;
+            text-decoration: none; color: var(--black); border-bottom: 8px solid var(--primary);
+            transition: 0.3s;
+        }
+        .cta-btn:hover { color: var(--primary); transform: translateY(-5px); }
+
+        /* --- Footer --- */
+        footer { padding: 80px 10%; border-top: 1px solid var(--gray); text-align: center; font-size: 0.7rem; letter-spacing: 3px; }
+
+        /* --- Animation --- */
+        .reveal { opacity: 0; transform: translateY(30px); transition: 1s cubic-bezier(0.215, 0.61, 0.355, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">T.YAMADA</div>
+        <div class="nav-info">PORTFOLIO ver. 2.0</div>
+    </nav>
+
+    <header>
+        <p class="label">GRADUATE RECRUITMENT 2027</p>
+        <h1>PASSION<br><span>BEYOND</span><br>LIMITS</h1>
+        <p class="desc">常識を疑い、新しい価値を創造する。</p>
+    </header>
+
+    <section id="strengths">
+        <h2 class="section-title reveal">MY<br>STRENGTHS</h2>
+        <div class="grid">
+            <article class="card reveal">
+                <img src="p1.jpg" alt="STRENGTH 01: RESOLVE">
+                <div class="card-info">
+                    <h3>01. RESOLVE</h3>
+                    <p>粘り強い課題解決力。複雑なエラーも確実に解消します。</p>
+                </div>
+            </article>
+            <article class="card reveal">
+                <img src="p2.jpg" alt="STRENGTH 02: CONNECT">
+                <div class="card-info">
+                    <h3>02. CONNECT</h3>
+                    <p>周囲を巻き込む協力体制。チームの出力を最大化させます。</p>
+                </div>
+            </article>
+        </div>
     </section>
 
-    <section id="strengths" class="fade-in">
-      <h2>STRENGTHS</h2>
-      <div class="grid">
-        <div class="card fade-in">
-          <div class="card-img-wrapper">
-            <img src="p1.jpg.jpeg" alt="粘り強い課題解決力"> </div>
-          <div class="card-content">
-            <h4>粘り強い課題解決力</h4>
-            <p>でたらめなエラーに直面しても、多角的な視点から調査を行い、でたらめな解決までやり遂げる力があります。</p>
-            <div class="skill-list">
-              <span class="skill-tag">Debugging</span> <span class="skill-tag">Problem Solving</span> <span class="skill-tag">Git</span>
+    <section class="profile-section">
+        <div class="profile-layout">
+            <div class="reveal">
+                <h2 class="section-title">WHO<br>I AM</h2>
             </div>
-          </div>
-        </div>
-        <div class="card fade-in">
-          <div class="card-img-wrapper">
-            <img src="p2.jpg.jpg" alt="周囲を巻き込む協力体制"> </div>
-          <div class="card-content">
-            <h4>周囲を巻き込む協力体制</h4>
-            <p>でたらめなチーム開発において、円滑なコミュニケーションを心がけ、でたらめな生産性を高める役割を担います。</p>
-            <div class="skill-list">
-              <span class="skill-tag">Teamwork</span> <span class="skill-tag">Communication</span> <span class="skill-tag">Slack</span>
+            <div class="reveal">
+                <div class="info-item">
+                    <span class="item-label">NAME</span>
+                    <p class="item-content">山田 太郎 / TARO YAMADA</p>
+                </div>
+                <div class="info-item">
+                    <span class="item-label">BELONGING</span>
+                    <p class="item-content">〇〇大学 〇〇学部 2027卒</p>
+                </div>
+                <div class="info-item">
+                    <span class="item-label">SKILLS</span>
+                    <p class="item-content">HTML5, CSS3, JS, Git, Figma</p>
+                </div>
+                <div class="info-item">
+                    <span class="item-label">HOBBY</span>
+                    <p class="item-content">Photography, Coding, Coffee</p>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </section>
 
-    <section id="timeline" class="fade-in">
-      <h2>CAREER (でたらめ)</h2>
-      <div class="timeline">
-        <div class="timeline-item fade-in">
-          <div class="timeline-content">
-            <span class="timeline-date">2024.10 - 現在</span>
-            <h4>でたらめ大学 〇〇研究室 所属</h4>
-            <p>「でたらめなAIを活用した、でたらめなUXデザイン」の研究に着手。</p>
-          </div>
-        </div>
-        <div class="timeline-item fade-in">
-          <div class="timeline-content">
-            <span class="timeline-date">2023.08 - 2023.12</span>
-            <h4>でたらめ株式会社 インターン</h4>
-            <p>でたらめなWebサービスの開発に携わり、でたらめな技術を習得。</p>
-          </div>
-        </div>
-        <div class="timeline-item fade-in">
-          <div class="timeline-content">
-            <span class="timeline-date">2022.04</span>
-            <h4>でたらめ大学 入学</h4>
-            <p>でたらめな学部・学科に入学。でたらめな知識の基礎を学ぶ。</p>
-          </div>
-        </div>
-      </div>
+    <section class="cta reveal">
+        <p style="font-weight: 900; margin-bottom: 20px;">ANY QUESTIONS?</p>
+        <a href="mailto:example@com" class="cta-btn">SAY HELLO.</a>
     </section>
 
-    <section id="skills" class="fade-in">
-      <h2>SKILLS / TOOLS</h2>
-      <div class="skills-grid">
-        <div class="skill-item fade-in">
-          <i>HTML5</i> <span>HTML5 / CSS3</span>
-        </div>
-        <div class="skill-item fade-in">
-          <i>JS</i>
-          <span>JavaScript</span>
-        </div>
-        <div class="skill-item fade-in">
-          <i>V</i>
-          <span>Vue.js / React</span>
-        </div>
-        <div class="skill-item fade-in">
-          <i>Git</i>
-          <span>Git / GitHub</span>
-        </div>
-        <div class="skill-item fade-in">
-          <i>S</i>
-          <span>Slack / Figma</span>
-        </div>
-      </div>
-    </section>
+    <footer>
+        &copy; 2026 TARO YAMADA. DESIGNED FOR THE FUTURE.
+    </footer>
 
-    <section id="profile" class="fade-in">
-      <h2>PROFILE</h2>
-      <table class="info-table">
-        <tr class="fade-in"><th>氏名</th><td>山田 太郎 / Taro Yamada</td></tr> <tr class="fade-in"><th>所属</th><td>でたらめ大学 でたらめ学部 (2027年3月卒業見込み)</td></tr>
-        <tr class="fade-in"><th>保有資格</th><td>でたらめパスポート、基本情報技術者試験、TOEIC 750点</td></tr>
-        <tr class="fade-in"><th>趣味</th><td>でたらめな個人開発、カフェ巡り、写真撮影</td></tr>
-      </table>
-    </section>
+    <script>
+        // Intersection Observer を使用した洗練された表示アニメーション
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1 // 10%見えたら実行
+        };
 
-  </main>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // 一度表示されたら監視を止める（何度も動かしたい場合は下を消す）
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
 
-  <div id="contact" class="cta-area fade-in">
-    <a href="mailto:example@gmail.com" class="cta-button">CONTACT ME</a>
-    <p style="margin-top:30px; color:var(--text-sub); font-size:1.1rem;">お問い合わせはこちらからお気軽にどうぞ(でたらめです)</p>
-  </div>
-
-  <footer>
-    &copy; 2026 Taro Yamada Portfolio Project. (内容のでたらめさは保証します) </footer>
-
-  <script>
-    // 画面に現れたらふわっと表示させる魔法 (Intersection Observer)
-    document.addEventListener('DOMContentLoaded', () => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-          }
+        // 対象の要素をすべて監視
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
         });
-      }, { threshold: 0.1 }); // 10%見えたらトリガー
-
-      document.querySelectorAll('.fade-in').forEach(el => {
-        observer.observe(el);
-      });
-    });
-  </script>
-
+    </script>
 </body>
 </html>
